@@ -1,36 +1,39 @@
-pipeline { 
-    environment { 
-        registry = "sbhalsing0/jenkins" 
-        registryCredential = 'sanket' 
-        dockerImage = '' 
+pipeline {
+    agent none
+    parameters {
+      choice(name: 'Environment', choices: ['prod','qa'], description: 'Setting this will deploy the services on selected environment')
     }
-    agent any 
-    stages { 
-        stage('Cloning our Git') { 
-            steps { 
-                git 'https://github.com/Sbhalsing0/docker-java-sample-webapp.git' 
+    environment {
+        //QA
+        DOCKER_IMAGE_NAME_QA = "hello-jenkins"
+        DOCKER_REGISTRY_PATH_QA = "sbhalsing0/jenkins"
+        registryCredential = 'dockerhub_id'
+        //prod
+        DOCKER_IMAGE_NAME_PROD = "hello-jenkins-prod"
+        DOCKER_REGISTRY_PATH_PROD = "sbhalsing0/popeye"
+        registryCredential = 'dockerhub_id'
+    }
+    stages {
+        stage('Example Build') {
+            agent { docker 'jenkins_slave' } 
+            steps {
+                echo 'Hello, Maven'
             }
-        } 
-        stage('Building our image') { 
-            steps { 
-                script { 
-                    dockerImage = docker.build registry + ":$BUILD_NUMBER" 
-                }
-            } 
         }
-        stage('Deploy our image') { 
-            steps { 
-                script { 
-                    docker.withRegistry( '', registryCredential ) { 
-                        dockerImage.push() 
-                    }
-                } 
-            }
-        } 
-        stage('Cleaning up') { 
-            steps { 
-                sh "docker rmi $registry:$BUILD_NUMBER" 
-            }
-        } 
     }
+        stage('Build and Push Docker Image QA Env') {
+        when {
+          expression {
+            return ((params.Environment == 'qa' && env.BRANCH_NAME == 'master')) 
+          }
+        }
+    }
+            steps {
+                script {
+                   app = docker.build(DOCKER_IMAGE_NAME_QA)
+                   docker.withRegistry(DOCKER_REGISTRY_PATH_QA, ecrcred_qa) {
+                   app.push("${env.GIT_COMMIT}")
+                    }
+                }
+        }
 }
