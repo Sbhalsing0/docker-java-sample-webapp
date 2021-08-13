@@ -7,7 +7,7 @@ pipeline {
     stages { 	
         stage('Build Jar') {
             steps {
-                echo "Hello Team"'
+                echo "Hello Team"
             }
         }
         stage('Build Image') {
