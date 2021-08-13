@@ -1,14 +1,14 @@
 pipeline { 
     environment { 
-        registry = "YourDockerhubAccount/YourRepository" 
-        registryCredential = 'dockerhub_id' 
+        registry = "sbhalsing0/jenkins" 
+        registryCredential = 'sanket' 
         dockerImage = '' 
     }
     agent any 
     stages { 
         stage('Cloning our Git') { 
             steps { 
-                git 'https://github.com/YourGithubAccount/YourGithubRepository.git' 
+                git 'https://github.com/Sbhalsing0/docker-java-sample-webapp.git' 
             }
         } 
         stage('Building our image') { 
